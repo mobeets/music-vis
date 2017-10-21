@@ -1,7 +1,7 @@
 var mic, fft, pos, vel, A, B, c, trgPos;
 var gain = 0.005;
 var canvasWidth = 900;
-var canvasHeight = 600;
+var canvasHeight = 550;
 var circRadius = 25;
 var score = 0;
 var ntrials = 0;
@@ -405,4 +405,13 @@ function keyPressed() {
       sinDiv = max(sinDiv - 5, 1);
       gain = max(gain - 0.0005, 0.00001);
    }
+}
+
+function hideIt() {
+    var x = document.getElementById("help");
+    if (x.style.display === "none") {
+        x.style.display = "block";
+    } else {
+        x.style.display = "none";
+    }
 }
