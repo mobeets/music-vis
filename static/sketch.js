@@ -210,7 +210,7 @@ function drawBg() {
    var c = color(255, 180, 0);
    stroke(c);
    
-   iterStep = iterCount*500*gain;
+   iterStep = iterCount*600*gain;
 
    power = 2;
    maxRadius = pow(1000, power);
