@@ -1,0 +1,35 @@
+html, body {
+  height: 100%;
+  font-family: 'Droid Serif', Georgia, serif;
+}
+
+body {
+  margin: 0;
+  display: flex;
+
+  /* This centers our sketch horizontally. */
+  justify-content: center;
+
+  /* This centers our sketch vertically. */
+  align-items: center;
+}
+
+#wrapper {
+  /*margin: 0 auto;*/
+  display: table; /* takes width of children */
+  margin-top: 20px;
+  padding-left: 10px;
+  padding-right: 10px;
+}
+#content {
+  padding-top: 20px;
+}
+
+.byline {
+  float: right;
+  font-size: 80%;
+}
+.byline a {
+  text-decoration: none;
+  border-bottom: dotted 1px black;
+}
