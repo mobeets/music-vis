@@ -155,7 +155,7 @@ function draw() {
 
    // update decoder with mic input
    iterCount += 1;
-   if (curOpt == 0) {
+   if (curOpt == 2) {
       drawWave();
    } else if (curOpt == 1) {
       showCursorHistory();

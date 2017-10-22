@@ -30,6 +30,9 @@ body {
   float: right;
   font-size: 80%;
 }
+.help {
+  font-size: 80%;
+}
 .byline a {
   text-decoration: none;
   border-bottom: dotted 1px black;
