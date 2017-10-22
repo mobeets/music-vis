@@ -37,6 +37,8 @@ var histTreb;
 var sinDiv = 50;
 var curOpt = 0;
 var nOpts = 3;
+var nStepsToIncrement = 1000;
+var doAutoIncrement = true;
 var dotPos;
 
 function setup() {
@@ -112,7 +114,8 @@ function setDecoder() {
 
 function getNextTraceColor() {
    // var c = color(0, random(128, 255), random(128, 255));
-   var c = color(10*iterCount % 255, 0, 10*iterCount % 255);
+   cval = 0 + (10*iterCount % 255);
+   var c = color(cval, 0, cval);
    return c;
 }
 
@@ -137,12 +140,18 @@ function startNewTrial(isSuccess) {
 function draw() {
 
    // draw target, cursor history, and score
-   background(255);
+   // background(255);
+   background(51);
    // showTarget();   
    // showScore();
 
    // display processed mic input
    getAndShowInput();
+
+   // auto-increment visual
+   if (doAutoIncrement && frameCount % nStepsToIncrement == 0) {
+      curOpt = (curOpt + 1) % nOpts;
+   }
 
    // update decoder with mic input
    iterCount += 1;
@@ -242,6 +251,7 @@ function drawWave() {
 }
 
 function drawBg() {
+   strokeWeight(3);
    // for (j = minInd; j<userInput.length; j++) {
    //    iterCount += userInput[j]/1000;
    // }
@@ -302,6 +312,7 @@ function getColorFromInd(cursorTraces, j, minInd) {
 }
 
 function showCursorHistory() {
+   strokeWeight(3);
    noFill();
    stroke(0);
 
@@ -423,7 +434,8 @@ function showScore() {
 }
 
 function mouseClicked() {
-   startNewExperiment();
+   // startNewExperiment();
+   curOpt = (curOpt + 1) % nOpts;
 }
 
 function keyPressed() {
@@ -442,6 +454,9 @@ function keyPressed() {
    if (keyCode === DOWN_ARROW) {
       sinDiv = max(sinDiv + 5, 200);
       gain = max(gain - 0.0005, 0.00001);
+   }
+   if (keyCode == SHIFT) {
+      doAutoIncrement = !doAutoIncrement;
    }
 }
 
