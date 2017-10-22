@@ -112,7 +112,7 @@ function setDecoder() {
 
 function getNextTraceColor() {
    // var c = color(0, random(128, 255), random(128, 255));
-   var c = color(0, 0, 10*iterCount % 255);
+   var c = color(10*iterCount % 255, 0, 10*iterCount % 255);
    return c;
 }
 
