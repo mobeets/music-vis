@@ -34,8 +34,10 @@ var trgClrs = [[0.8431,0.1882,0.1529],
 var histLow;
 var histMid;
 var histTreb;
-var curOpt = 0;
 var sinDiv = 50;
+var curOpt = 0;
+var nOpts = 3;
+var dotPos;
 
 function setup() {
    var canvas = createCanvas(canvasWidth, canvasHeight);
@@ -51,6 +53,12 @@ function setup() {
 
    cursorTraces = new Array();
    cursorTracesColors = new Array();
+
+   dotPos = new Array();
+   for (var j=0; j++; j<32) {
+      // var c = createVector(canvasWidth/2, canvasHeight/2);
+      append(dotPos, [canvasWidth/2, canvasHeight/2]);
+   }
 
    histLow = new Array();
    histMid = new Array();
@@ -104,7 +112,7 @@ function setDecoder() {
 
 function getNextTraceColor() {
    // var c = color(0, random(128, 255), random(128, 255));
-   var c = color(10*iterCount % 255, 0, 0);
+   var c = color(0, 0, 10*iterCount % 255);
    return c;
 }
 
@@ -140,13 +148,44 @@ function draw() {
    iterCount += 1;
    if (curOpt == 0) {
       drawWave();
-   } else {
+   } else if (curOpt == 1) {
       showCursorHistory();
       drawBg();
       updateAndDrawCursor();
+   } else {
+      // drawWave();
+      drawBg();
+      drawDots();
    }
    // checkIfCursorAcquiredTarget();   
 
+}
+
+function drawDots() {   
+   for (i=0; i<userInput.length; i++) {
+
+      cr = 7*i;
+      ccr = (cr + iterCount) % round(0.5*canvasWidth);
+      cang = userInput[i] % 360;
+
+      d = color(0, cr % 255, 0);
+      stroke(d);
+
+      pv = dotPos[i];
+      if (pv == undefined) {
+         pv = createVector(0, 0);
+      }
+
+      beginShape();
+      for (j=0; j<pv.y; j++) {
+         ccang = (cang + iterCount + j/2) % 360;
+         cx = ccr*cos(ccang*PI/180);
+         cy = ccr*sin(ccang*PI/180);
+         vertex(cx + canvasWidth/2, cy + canvasHeight/2);
+      }
+      endShape();
+      dotPos[i] = createVector(cr, cang);
+   }
 }
 
 function drawWave() {
@@ -191,6 +230,7 @@ function drawWave() {
          var r = 1*hist[ind];
 
          r = (pr+nr+r)/3 + (pwav+wav+nwav)/3;
+         // r = r + wav;
          r += prevr + 1;
 
          ccx = cx + r*cos(j*PI/180);
@@ -314,12 +354,6 @@ function updateAndDrawCursor() {
    vel = updateCursorVel(userInput, vel, A, B, c);
    pos = updateCursorPos(pos, vel, gain);
    resetIfHitBoundary();
-
-   // draw cursor
-   // var clr = color(121, 141, 224);
-   // fill(clr);
-   // noStroke();
-   // ellipse(pos.x, pos.y, circRadius); // x, y, w, h
 }
 
 function showTarget() {
@@ -393,16 +427,20 @@ function mouseClicked() {
 }
 
 function keyPressed() {
+   if (keyCode === LEFT_ARROW) {
+      startNewTrial(false);
+      curOpt = (curOpt - 1) % nOpts;
+   }
    if (keyCode === RIGHT_ARROW) {
       startNewTrial(false);
-      curOpt = (curOpt + 1) % 2;
+      curOpt = (curOpt + 1) % nOpts;
    }
    if (keyCode === UP_ARROW) {
-      sinDiv = min(sinDiv + 5, 200);
+      sinDiv = min(sinDiv - 5, 1);
       gain = min(gain + 0.0005, 1.0);
    }
    if (keyCode === DOWN_ARROW) {
-      sinDiv = max(sinDiv - 5, 1);
+      sinDiv = max(sinDiv + 5, 200);
       gain = max(gain - 0.0005, 0.00001);
    }
 }
