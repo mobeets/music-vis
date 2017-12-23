@@ -160,8 +160,8 @@ function draw() {
    if (curOpt == 2) {
       drawWave();
    } else if (curOpt == 1) {
-      showCursorHistory();
       drawBg();
+      showCursorHistory();
       updateAndDrawCursor();
    } else {
       // drawWave();
@@ -279,9 +279,9 @@ function drawBg() {
 
    maxWidth = 1.2*canvasWidth; // radius of largest circle
 
-   d = 0.05; // viewing distance from screen
+   d = 0.2; // viewing distance from screen
    D = 5; // initial distance from circle
-   T = 1000; // animation length (controls speed)
+   T = 600; // animation length (controls speed)
    maxRadius = 1; // use 1 because we later use map
    minRadius = 0.0;
    nCircles = 20; // number of circles rendered
