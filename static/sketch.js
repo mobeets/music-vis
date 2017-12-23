@@ -1,7 +1,9 @@
 var mic, fft, pos, vel, A, B, c, trgPos;
 var gain = 0.005;
-var canvasWidth = 900;
-var canvasHeight = 550;
+// var canvasWidth = 900;
+// var canvasHeight = 550;
+var canvasWidth = window.innerWidth;
+var canvasHeight = window.innerHeight;
 var circRadius = 25;
 var score = 0;
 var ntrials = 0;
@@ -170,14 +172,30 @@ function draw() {
 
 }
 
-function drawDots() {   
+function drawDots() {
+   d0 = 0.05; // viewing distance from screen
+   D = 5; // initial distance from circle
+   T = 400; // animation length (controls speed)
+   maxR = round(0.5*canvasWidth);
+   // strokeWeight(1);
+
    for (i=0; i<userInput.length; i++) {
 
       cr = 7*i;
-      ccr = (cr + iterCount) % round(0.5*canvasWidth);
+      ccr0 = (cr + iterCount) % round(0.5*canvasWidth);
+      // if (i == 0) { text(ccr0, 50, 50); }
+
+      iOffset = i*(T/userInput.length);
+      tc = (iterCount + iOffset) % T;
+      x_t = d0 + ((T - tc)/T)*(D - d0);
+      ccr = d0*maxR/x_t;
+      // text(d0, 100, 50 + 10*i);
+      // strokeWeight(1 + 3*(tc/T));
+
       cang = userInput[i] % 360;
 
-      d = color(0, cr % 255, 0);
+      // d = color(0, cr % 255, 0);
+      d = color(0, map(pow(tc, 2), 0, pow(T, 2), 0, 255), 0);
       stroke(d);
 
       pv = dotPos[i];
@@ -187,7 +205,8 @@ function drawDots() {
 
       beginShape();
       for (j=0; j<pv.y; j++) {
-         ccang = (cang + iterCount + j/2) % 360;
+         // ccang = (cang + iterCount + j/2) % 360;
+         ccang = (cang + j) % 360;
          cx = ccr*cos(ccang*PI/180);
          cy = ccr*sin(ccang*PI/180);
          vertex(cx + canvasWidth/2, cy + canvasHeight/2);
@@ -240,7 +259,7 @@ function drawWave() {
 
          r = (pr+nr+r)/3 + (pwav+wav+nwav)/3;
          // r = r + wav;
-         r += prevr + 1;
+         r += prevr + 1;         
 
          ccx = cx + r*cos(j*PI/180);
          ccy = cy + r*sin(j*PI/180);
@@ -251,34 +270,43 @@ function drawWave() {
 }
 
 function drawBg() {
+   // draw circles with increasing radii
+   // as if you're travelling through a tunnel
    strokeWeight(3);
-   // for (j = minInd; j<userInput.length; j++) {
-   //    iterCount += userInput[j]/1000;
-   // }
-   // iterCount = iterCount % 10000;
-   
+
    var c = color(255, 180, 0);
    stroke(c);
-   
-   iterStep = iterCount*600*gain;
 
-   power = 2;
-   maxRadius = pow(1000, power);
-   maxWidth = 1.2*canvasWidth;
+   maxWidth = 1.2*canvasWidth; // radius of largest circle
 
-   startArc = 0.05*iterCount % TWO_PI;
-   endArc = startArc + (0.05*iterCount % TWO_PI);
-   startArc = 0;
-   endArc = 10;
+   d = 0.05; // viewing distance from screen
+   D = 5; // initial distance from circle
+   T = 1000; // animation length (controls speed)
+   maxRadius = 1; // use 1 because we later use map
+   minRadius = 0.0;
+   nCircles = 20; // number of circles rendered
 
-   arcRadius = pow((iterStep % 1000), power);
-   arc(canvasWidth/2, canvasHeight/2, map(arcRadius, 0, maxRadius, 0, maxWidth), map(arcRadius, 0, maxRadius, 0, maxWidth), map(startArc, 0, 10, 0, TWO_PI), map(endArc, 0, 10, 0, TWO_PI));
+   // make circle position oscillate
+   // as if tunnel is curving
+   cx_0 = 0*sin(iterCount/80 % 1000);
+   cy_0 = 0*cos(iterCount/80 % 1000);
 
-   arcRadius = pow((iterStep + 333) % 1000, power);
-   arc(canvasWidth/2, canvasHeight/2, map(arcRadius, 0, maxRadius, 0, maxWidth), map(arcRadius, 0, maxRadius, 0, maxWidth), map(startArc, 0, 10, 0, TWO_PI), map(endArc, 0, 10, 0, TWO_PI));
+   for (j = 0; j<nCircles; j++) {      
+      circOffset = j*(T/nCircles);
+      t = (iterCount + circOffset) % T;
+      x_t = d + ((T - t)/T)*(D - d);
+      r_t = d*maxRadius/x_t;
+      if (r_t < minRadius) { continue; }
+      // strokeWeight(1 + 3*(t/T));
 
-   arcRadius = pow((iterStep + 666) % 1000, power);
-   arc(canvasWidth/2, canvasHeight/2, map(arcRadius, 0, maxRadius, 0, maxWidth), map(arcRadius, 0, maxRadius, 0, maxWidth), map(startArc, 0, 10, 0, TWO_PI), map(endArc, 0, 10, 0, TWO_PI));
+      c_tx = cx_0*(T - t)/T;
+      c_ty = cy_0*(T - t)/T;
+
+      dc = color(map(pow(t, 2), 0, pow(T, 2), 255, 250), map(pow(t, 2.2), 0, pow(T, 2.2), 120, 180), 0);
+      stroke(dc);
+
+      arc(c_tx + canvasWidth/2, c_ty + canvasHeight/2, map(r_t, 0, 1, 0, maxWidth), map(r_t, 0, 1, 0, maxWidth), 0, TWO_PI);
+   }
 }
 
 function getAndShowInput() {
