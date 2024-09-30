@@ -43,7 +43,7 @@ var sinDiv = 50;
 var curOpt = 0;
 var nOpts = 3;
 var nStepsToIncrement = 1000; // 1000
-var doAutoIncrement = false;
+var doAutoIncrement = true;
 var dotPos;
 
 function setup() {
