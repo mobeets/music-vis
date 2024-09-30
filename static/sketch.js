@@ -15,7 +15,7 @@ var spectrumBins = 1024; // 2^k for k between 4 and 10
 var spectrum;
 var userInput;
 // var nInputDims = 1024; // spectrum.length
-var nInputDims = 32;
+var nInputDims = 33;
 var showCheat = false;
 
 var pdClrInds; // for cheating
@@ -39,7 +39,7 @@ var histTreb;
 var sinDiv = 50;
 var curOpt = 0;
 var nOpts = 3;
-var nStepsToIncrement = 1000;
+var nStepsToIncrement = 1000; // 1000
 var doAutoIncrement = true;
 var dotPos;
 
@@ -422,6 +422,7 @@ function updateCursorVel(spectrum, vel, A, B, c) {
 
    // compute B*spectrum
    for (i = 0; i<spectrum.length; i++) {
+      // console.log([B[i], spectrum[i], B.length, spectrum.length, i]);
       velNext.add(p5.Vector.mult(B[i], spectrum[i]));
    }
 
