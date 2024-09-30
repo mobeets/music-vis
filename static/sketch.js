@@ -14,9 +14,12 @@ var spectrumSmoothing = 0.8; // between 0.0 and 1.0
 var spectrumBins = 1024; // 2^k for k between 4 and 10
 var spectrum;
 var userInput;
-// var nInputDims = 1024; // spectrum.length
 var nInputDims = 33;
 var showCheat = false;
+
+// quads
+let nQuads = 30;
+let quads = [];
 
 var pdClrInds; // for cheating
 var trgRadius = 50;
@@ -40,7 +43,7 @@ var sinDiv = 50;
 var curOpt = 0;
 var nOpts = 3;
 var nStepsToIncrement = 1000; // 1000
-var doAutoIncrement = true;
+var doAutoIncrement = false;
 var dotPos;
 
 function setup() {
@@ -63,6 +66,8 @@ function setup() {
       // var c = createVector(canvasWidth/2, canvasHeight/2);
       append(dotPos, [canvasWidth/2, canvasHeight/2]);
    }
+
+   initQuads(20);
 
    histLow = new Array();
    histMid = new Array();
@@ -159,17 +164,31 @@ function draw() {
    iterCount += 1;
    if (curOpt == 2) {
       drawWave();
+      for (let quado of quads) {
+         quado.update(userInput);
+      }
+      for (let quado of quads) {
+         quado.render();
+      }
    } else if (curOpt == 1) {
       drawBg();
       showCursorHistory();
       updateAndDrawCursor();
-   } else {
+   } else if (curOpt === 0) {
       // drawWave();
       drawBg();
       drawDots();
+   } else {
+      // beginShape();
+      // for (i = 0; i<userInput.length; i++) {      
+      //    var vx = map(i, 0, userInput.length, 0, width);
+      //    vertex(vx, map(userInput[i], 0, 255, height, height/2));
+      // }
+      // endShape();
+      // drawWave();
+      
    }
    // checkIfCursorAcquiredTarget();   
-
 }
 
 function drawDots() {
@@ -316,13 +335,7 @@ function getAndShowInput() {
    stroke(c);
    strokeWeight(2);
 
-   var amps = fft.logAverages(fft.getOctaveBands(3));
-   // beginShape();
-   // for (i = 0; i<amps.length; i++) {      
-   //    var vx = map(i, 0, amps.length, 0, width);
-   //    vertex(vx, map(amps[i], 0, 255, height, height/2));
-   // }
-   // endShape();
+   var amps = fft.logAverages(fft.getOctaveBands(3));   
    userInput = amps;
 }
 
@@ -421,6 +434,10 @@ function updateCursorVel(spectrum, vel, A, B, c) {
    var velNext = createVector(velx, vely);
 
    // compute B*spectrum
+   if (B.length != spectrum.length) {
+      console.log('nInputDims should be changed to match spectrum.length');
+      console.log([nInputDims, B.length, spectrum.length]);
+   }
    for (i = 0; i<spectrum.length; i++) {
       // console.log([B[i], spectrum[i], B.length, spectrum.length, i]);
       velNext.add(p5.Vector.mult(B[i], spectrum[i]));
@@ -452,6 +469,102 @@ function checkIfCursorAcquiredTarget() {
       ellipse(trgPos.x, trgPos.y, trgRadius);
       startNewTrial(true);
    }
+}
+
+class Quad {
+  constructor(colorValue) {
+    
+    // Store the color using p5's color function
+    this.color = color(colorValue);
+    
+    // Initialize an empty array to store p5.Vector objects
+    this.vectors = [];
+    this.velocities = [];
+  }
+
+  // Method to add a p5.Vector to the list
+  addVector(x, y, vx, vy) {
+    let vector = createVector(x, y, 0);
+    this.vectors.push(vector);
+    
+    let vel = createVector(vx, vy, 0);
+    this.velocities.push(vel);
+  }
+
+  // Method to retrieve the color
+  getColor() {
+    return this.color;
+  }
+
+  // Method to retrieve the list of vectors
+  getVectors() {
+    return this.vectors;
+  }
+  
+  update(userInput, maxWidth = canvasWidth, maxHeight = canvasHeight) {
+   // use current volume to scale velocity
+   let curScale = 1.0;
+   // for (let i=0; i<userInput.length; i++) {
+   //    curScale += userInput[i];
+   // }
+   // curScale = (0.02 * curScale / userInput.length).toPrecision(3);
+
+   for (let i=0; i<this.vectors.length; i++) {
+      if (this.vectors[i].x + this.velocities[i].x < 0) {
+        this.velocities[i].x = -this.velocities[i].x;
+      }
+      if (this.vectors[i].x + this.velocities[i].x > maxWidth) {
+        this.velocities[i].x = -this.velocities[i].x;
+      }
+      if (this.vectors[i].y + this.velocities[i].y < 0) {
+        this.velocities[i].y = -this.velocities[i].y;
+      }
+      if (this.vectors[i].y + this.velocities[i].y > maxHeight) {
+        this.velocities[i].y = -this.velocities[i].y;
+      }
+      this.vectors[i].x += curScale * this.velocities[i].x;
+      this.vectors[i].y += curScale * this.velocities[i].y;
+   }
+  }
+
+  // Method to display the color and vectors
+  render() {
+    if (this.vectors.length < 1) { return; }
+    
+    beginShape();
+    // Set the fill color to the stored color
+    noFill();
+    stroke(this.color);
+    strokeWeight(2);
+    
+    // Iterate through the vector list and draw points at each vector position
+    for (let v of this.vectors) {
+      vertex(v.x, v.y);
+    }
+    vertex(this.vectors[0].x, this.vectors[0].y); // close shape
+    
+    endShape();
+  }
+}
+
+function initQuads(nQuads) {
+   // create initial velocities
+  let vels = [];
+  vels.push(createVector(3, -10));
+  vels.push(createVector(-3, -5));
+  vels.push(createVector(2, 4));
+  vels.push(createVector(-2, 5));
+  
+  // create quads
+  let scl = 5;
+  for (let i=0; i < nQuads; i++) {
+    let quado = new Quad(color(255, 204 - i*3, 0));
+    quado.addVector(10 + scl*i, 0, vels[0].x, vels[0].y);
+    quado.addVector(canvasWidth, canvasHeight-scl*i, vels[1].x, vels[1].y);
+    quado.addVector(scl*i, canvasHeight, vels[2].x, vels[2].y);
+    quado.addVector(0, scl*i, vels[3].x, vels[3].y);
+    quads.push(quado);
+  }
 }
 
 function showScore() {
